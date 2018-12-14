@@ -1,9 +1,12 @@
 mod BOTELLON
   pr NAT .
-  sort Persona .
+  pr STRING .
+  sort Persona Bolsa Ubicacion .
   subsort Ubicacion Bolsa < Persona .
 
-  op Bolsa(_,_,_) : Nat Nat Nat -> Bolsa .
-  op Persona(_,_,_,_,_,_) : S N B V P U -> Persona .
+  *** ---- Refresco, Hielo, Alcohol
+  op Bolsa(_,_,_) : Nat Nat Nat -> Bolsa [ctor] .
+  *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
+  op Persona(_,_,_,_,_,_) : String Nat Bolsa Nat Nat Ubicacion -> Persona [ctor] .
 
 endm
