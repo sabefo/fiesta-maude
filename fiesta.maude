@@ -1,0 +1,9 @@
+mod BOTELLON
+  pr NAT .
+  sort Persona .
+  subsort Ubicacion Bolsa < Persona .
+
+  op Bolsa(_,_,_) : Nat Nat Nat -> Bolsa .
+  op Persona(_,_,_,_,_,_) : S N B V P U -> Persona .
+
+endm
