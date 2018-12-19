@@ -11,6 +11,8 @@ mod PERSONAS
   *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
   op Persona(_,_,[_,_,_],_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
 
+endm
+
 fmod BOTELLON
   pr NAT .
   pr STRING .
@@ -43,8 +45,15 @@ endm
 
 mod FILA is
  pr PERSONAS .
- 
+
  op fila-vacia : -> fila [ctor] .
  op enfila : persona fila -> fila [ctor] .
+
+ vars P P' = persona .
+ var F F' = fila .
+
+ op desenfila : fila -> fila .
+ eq desenfila(fila-vacia) = fila-vacia .
+ eq desenfila(enfila(N, P)) = F .
 
 endm
