@@ -1,4 +1,4 @@
-fmod BOTELLON
+mod PERSONAS
   pr NAT .
   pr STRING .
 
@@ -6,16 +6,23 @@ fmod BOTELLON
   subsort Bolsa < Persona .
   subsort Persona < Botellon .
 
-  vars R R' H H' A A' N N' V V' P P' U U' : Nat .
-  vars S : String .
-  vars W W' : Persona .
-
   *** ---- Refresco, Hielo, Alcohol
   op Bolsa[_,_,_] : Nat Nat Nat -> Bolsa [ctor] .
   *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
   op Persona(_,_,[_,_,_],_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
 
   op __ : Persona Persona -> Botellon [ctor assoc comm id: nadie] .
+endm
+
+fmod BOTELLON
+  pr NAT .
+  pr STRING .
+  pr PERSONAS .
+  pr FILA .
+
+  vars R R' H H' A A' N N' V V' P P' U U' : Nat .
+  vars S : String .
+  vars W W' : Persona .
 
   op bebeRefresco : Persona Persona -> Persona Persona .
   ceq bebeRefresco(Persona(S,N,Bolsa[R,H,A],V,P,U) W) = Persona(S,N,Bolsa[R - 1,H - 1,A],V,P,U) W
@@ -26,8 +33,28 @@ fmod BOTELLON
 
   ***    owise = no se puede .
 
-  op bebeTequila : Persona -> Persona .
-  ceq bebeTequila(Persona(S,N,Bolsa[R,H,A],V,P,U)) = Persona(S,N,Bolsa[R - 1,H - 1,A - 1], V, P + 1,U)
+  op bebeTequila : Persona Persona -> Persona Persona .
+  ceq bebeTequila((Persona(S,N,Bolsa[R,H,A],V,P,U) W) = Persona(S,N,Bolsa[R - 1,H - 1,A - 1], V, P + 1,U) W
     if R > 0 /\ H > 0 /\ A > 0 .
+
+  ceq bebeTequila(Persona(S,N,Bolsa[R,H,A],V,P,U) Persona(S',N',Bolsa[R',H',A'],V',P',U')) = Persona(S,N,Bolsa[R - 1, H,A - 1], V, P + 1,U) Persona(S',N',Bolsa[R',H' - 1,A'],V',P',U')
+    if R > 0 /\ H = 0 /\ H'>0 /\ A > 0 .
+
+  *** owise = no se puede .
+
+endm
+
+mod FILA is
+ pr PERSONAS .
+
+ op fila-vacia : -> fila [ctor] .
+ op enfila : persona fila -> fila [ctor] .
+
+ vars P P' = persona .
+ var F F' = fila .
+
+ op desenfila : fila -> fila .
+ eq desenfila(fila-vacia) = fila-vacia .
+ eq desenfila(enfila(N, P)) = F .
 
 endm
