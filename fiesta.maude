@@ -46,14 +46,19 @@ endm
 mod FILA is
  pr PERSONAS .
 
+ vars P P' : Persona .
+ vars F F' : fila .
+ vars fv : fila-vacia .
+ 
  op fila-vacia : -> fila [ctor] .
- op enfila : persona fila -> fila [ctor] .
+ op enfila : fila Persona -> fila [ctor] .
 
- vars P P' = persona .
- var F F' = fila .
+ eq enfila(fv) = fv .
+ eq enfila(F,Persona(),Persona()) = (F,Persona(),Persona())
 
- op desenfila : fila -> fila .
- eq desenfila(fila-vacia) = fila-vacia .
- eq desenfila(enfila(N, P)) = F .
+
+ op entralocal : fila -> fila .
+ eq entralocal(fila-vacia) = fila-vacia .
+ eq entralocal(enfila(P, F)) = F .
 
 endm
