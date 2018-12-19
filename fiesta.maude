@@ -15,6 +15,8 @@ fmod BOTELLON
   *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
   op Persona(_,_,[_,_,_],_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
 
+  op __ : Persona Persona -> Botellon [ctor assoc comm id: nadie] .
+
   op bebeRefresco : Persona Persona -> Persona Persona .
   ceq bebeRefresco(Persona(S,N,Bolsa[R,H,A],V,P,U) W) = Persona(S,N,Bolsa[R - 1,H - 1,A],V,P,U) W
     if R > 0 /\ H > 0 .
@@ -22,7 +24,7 @@ fmod BOTELLON
   ceq bebeRefresco(Persona(S,N,Bolsa[R,H,A],V,P,U) Persona(S',N',Bolsa[R',H',A'],V',P',U')) = Persona(S,N,Bolsa[R - 1,H,A],V,P,U) Persona(S',N',Bolsa[R',H' - 1,A'],V',P',U')
     if R > 0 /\ H = 0 /\ H' > 0 .
 
-  ***    owise = no se puede cabron .
+  ***    owise = no se puede .
 
   op bebeTequila : Persona -> Persona .
   ceq bebeTequila(Persona(S,N,Bolsa[R,H,A],V,P,U)) = Persona(S,N,Bolsa[R - 1,H - 1,A - 1], V, P + 1,U)
