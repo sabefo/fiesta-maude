@@ -53,7 +53,7 @@ fmod BOTELLON
  op fila-vacia : -> Fila [ctor] .
  op enfila : Fila Persona -> Fila [ctor] .
 
- *** ¿Esto cubre los 3 casos?0==================
+ *** ¿Esto cubre los 3 casos?==================
 
  eq enfila(fv) = fv .
  eq enfila(F,Persona(S, N, Bolsa[R, H, A], 0, P, U), Persona(S', N' ,Bolsa[R', H', A'], 1, P', U')) = 
