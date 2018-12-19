@@ -1,4 +1,4 @@
-mod PERSONAS
+fmod PERSONAS is
   pr NAT .
   pr STRING .
 
@@ -7,15 +7,14 @@ mod PERSONAS
   subsort Persona < Botellon .
 
   *** ---- Refresco, Hielo, Alcohol
-  op BolsaVacia[0,0,0] : Nat Nat Nat -> Bolsa [ctor] .
+  op BolsaVacia : -> Bolsa [ctor] .
   op Bolsa[_,_,_] : Nat Nat Nat -> Bolsa [ctor] .
   *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
-  op Persona(_,_,[_,_,_],_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
+  op Persona(_,_,[_],_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
 
-  op __ : Persona Persona -> Botellon [ctor assoc comm id: nadie] .
-endm
+endfm
 
-fmod BOTELLON
+fmod BOTELLON is
   pr NAT .
   pr STRING .
   pr PERSONAS .
@@ -74,7 +73,7 @@ fmod BOTELLON
 
 endm
 
-mod ANTRO
+fmod LOCAL is
   pr NAT .
   pr PERSONAS .
 
@@ -85,14 +84,14 @@ mod ANTRO
   *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
   op Persona(_,_,BolsaVacia[0,0,0],_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
 
-  op bebeRefresco : Persona Antro -> Persona Antro .
+  op bebeRefrescoLocal : Persona Antro -> Persona Antro .
   ceq bebeRefresco(Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, R)) =
     Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, R - 1)
     if R > 0 .
 
-  op bebeTequila : Persona Antro -> Persona Antro .
+  op bebeTequilaLocal : Persona Antro -> Persona Antro .
   ceq bebeTequila(Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, R)) =
     Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A - 1, R - 1)
     if R > 0 /\ A > 0 .
 
-endm
+endfm
