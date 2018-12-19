@@ -7,10 +7,12 @@ mod PERSONAS
   subsort Persona < Botellon .
 
   *** ---- Refresco, Hielo, Alcohol
+  op BolsaVacia[0,0,0] : Nat Nat Nat -> Bolsa [ctor] .
   op Bolsa[_,_,_] : Nat Nat Nat -> Bolsa [ctor] .
   *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
   op Persona(_,_,[_,_,_],_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
 
+  op __ : Persona Persona -> Botellon [ctor assoc comm id: nadie] .
 endm
 
 fmod BOTELLON
@@ -56,9 +58,9 @@ fmod BOTELLON
  *** ¿Esto cubre los 3 casos?==================
 
  eq enfila(fv) = fv .
- eq enfila(F,Persona(S, N, Bolsa[R, H, A], 0, P, U), Persona(S', N' ,Bolsa[R', H', A'], 1, P', U')) = 
+ eq enfila(F,Persona(S, N, Bolsa[R, H, A], 0, P, U), Persona(S', N' ,Bolsa[R', H', A'], 1, P', U')) =
  	(F,Persona(S', N', Bolsa[R', H', A'], 1, P', U'), Persona(S, N, Bolsa[R, H, A], 0, P, U)) .
- 
+
  op sacadefila : Fila Persona -> Fila [ctor] .
  ceq sacadefila(F,Persona(S, N, Bolsa[R, H, A], V, P, U)) = (F,fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, U)
  	if P > 2 .
@@ -70,4 +72,27 @@ fmod BOTELLON
  eq entralocal(fila-vacia) = fila-vacia .
  eq entralocal(enfila(P, F)) = F .
 
-endfm
+endm
+
+mod ANTRO
+  pr NAT .
+  pr PERSONAS .
+
+  sort Persona .
+  *** ---- Aforo, Alcohol, Refresco
+  op Antro(_,_,_) : Nat Nat Nat -> Antro [ctor] .
+
+  *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
+  op Persona(_,_,BolsaVacia[0,0,0],_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
+
+  op bebeRefresco : Persona Antro -> Persona Antro .
+  ceq bebeRefresco(Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, R)) =
+    Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, R - 1)
+    if R > 0 .
+
+  op bebeTequila : Persona Antro -> Persona Antro .
+  ceq bebeTequila(Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, R)) =
+    Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A - 1, R - 1)
+    if R > 0 /\ A > 0 .
+
+endm
