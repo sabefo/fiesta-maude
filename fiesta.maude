@@ -22,8 +22,10 @@ fmod BOTELLON
   pr FILA .
 
   vars R R' H H' A A' N N' V V' P P' U U' : Nat .
-  vars S : String .
+  vars S S' : String .
   vars W W' : Persona .
+
+  op entrabotellon : Botellon Persona -> Botellon [ctor].
 
   op bebeRefresco : Persona Persona -> Persona Persona .
   ceq bebeRefresco(Persona(S,N,Bolsa[R,H,A],V,P,U) W) = Persona(S,N,Bolsa[R - 1,H - 1,A],V,P,U) W
@@ -43,23 +45,30 @@ fmod BOTELLON
 
   *** owise = no se puede .
 
-endm
-
-mod FILA is
- pr PERSONAS .
+ sort Fila .
+ subsort Persona < Fila .
 
  vars P P' : Persona .
- vars F F' : fila .
+ vars F F' : Fila .
  vars fv : fila-vacia .
 
- op fila-vacia : -> fila [ctor] .
- op enfila : fila Persona -> fila [ctor] .
+ op fila-vacia : -> Fila [ctor] .
+ op enfila : Fila Persona -> Fila [ctor] .
+
+ *** ¿Esto cubre los 3 casos?0==================
 
  eq enfila(fv) = fv .
- eq enfila(F,Persona(),Persona()) = (F,Persona(),Persona())
+ eq enfila(F,Persona(S, N, Bolsa[R, H, A], 0, P, U), Persona(S', N' ,Bolsa[R', H', A'], 1, P', U')) =
+ 	(F,Persona(S', N', Bolsa[R', H', A'], 1, P', U'), Persona(S, N, Bolsa[R, H, A], 0, P, U)) .
 
+ op sacadefila : Fila Persona -> Fila [ctor] .
+ ceq sacadefila(F,Persona(S, N, Bolsa[R, H, A], V, P, U)) = (F,fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, U)
+ 	if P > 2 .
 
- op entralocal : fila -> fila .
+ ceq sacadefila(F,Persona(S, N, Bolsa[R, H, A], V, P, U)) = (F,fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, U)
+ 	if N < 18 .
+
+ op entralocal : Fila -> Fila .
  eq entralocal(fila-vacia) = fila-vacia .
  eq entralocal(enfila(P, F)) = F .
 
