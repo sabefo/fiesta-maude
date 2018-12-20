@@ -7,14 +7,16 @@ fmod PERSONAS is
   subsort Persona < Botellon .
 
   *** ---- Refresco, Hielo, Alcohol
+  op __ : Botellon Botellon -> Botellon [ctor assoc comm] .
+  *** botellonvacio
   op BolsaVacia : -> Bolsa [ctor] .
   op Bolsa[_,_,_] : Nat Nat Nat -> Bolsa [ctor] .
   *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
-  op Persona(_,_,[_],_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
+  op Persona(_,_,_,_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
 
 endfm
 
-fmod BOTELLON is
+mod BOTELLON is
   pr NAT .
   pr STRING .
   pr PERSONAS .
@@ -24,41 +26,38 @@ fmod BOTELLON is
   vars S S' : String .
   vars W W' : Persona .
 
-  op entrabotellon : Botellon Persona -> Botellon [ctor].
+  op entrabotellon : Botellon Persona -> Botellon [ctor] .
 
-  op bebeRefresco : Persona Persona -> Persona Persona .
-  ceq bebeRefresco(Persona(S,N,Bolsa[R,H,A],V,P,U) W) = Persona(S,N,Bolsa[R - 1,H - 1,A],V,P,U) W
+  crl [bebeTu] : Persona(S,N,Bolsa[R,H,A],V,P,U) => Persona(S,N,Bolsa[sd(R, 1),sd(H ,1),A],V,P,U)
     if R > 0 /\ H > 0 .
 
-  ceq bebeRefresco(Persona(S,N,Bolsa[R,H,A],V,P,U) Persona(S',N',Bolsa[R',H',A'],V',P',U')) = Persona(S,N,Bolsa[R - 1,H,A],V,P,U) Persona(S',N',Bolsa[R',H' - 1,A'],V',P',U')
-    if R > 0 /\ H = 0 /\ H' > 0 .
+  crl [bebequita] :(Persona(S,N,Bolsa[R,H,A],V,P,U) Persona(S',N',Bolsa[R',H',A'],V',P',U')) => Persona(S,N,Bolsa[R - 1,H,A],V,P,U) Persona(S',N',Bolsa[R',sd(H',1),A'],V',P',U')
+    if R > 0 /\ H == 0 /\ H' > 0 .
 
-  ***    owise = no se puede .
-
-  op bebeTequila : Persona Persona -> Persona Persona .
-  ceq bebeTequila((Persona(S,N,Bolsa[R,H,A],V,P,U) W) = Persona(S,N,Bolsa[R - 1,H - 1,A - 1], V, P + 1,U) W
+  crl [bebeTequila] : Persona(S,N,Bolsa[R,H,A],V,P,U) => Persona(S,N,Bolsa[sd(R,1),sd(H,1),sd(A,1)], V, P + 1,U)
     if R > 0 /\ H > 0 /\ A > 0 .
 
-  ceq bebeTequila(Persona(S,N,Bolsa[R,H,A],V,P,U) Persona(S',N',Bolsa[R',H',A'],V',P',U')) = Persona(S,N,Bolsa[R - 1, H,A - 1], V, P + 1,U) Persona(S',N',Bolsa[R',H' - 1,A'],V',P',U')
-    if R > 0 /\ H = 0 /\ H'>0 /\ A > 0 .
-
-  *** owise = no se puede .
+  crl [bebeTequilaquita] : (Persona(S,N,Bolsa[R,H,A],V,P,U) Persona(S',N',Bolsa[R',H',A'],V',P',U')) => Persona(S,N,Bolsa[sd(R,1), H,sd(A,1)], V, P + 1,U) Persona(S',N',Bolsa[R',sd(H',1),A'],V',P',U')
+    if R > 0 /\ H == 0 /\ H'>0 /\ A > 0 .
 
  sort Fila .
  subsort Persona < Fila .
 
- vars P P' : Persona .
  vars F F' : Fila .
- vars fv : fila-vacia .
+ 
+ op fv : -> Fila [ctor] .
+ op _._ : Fila Persona -> Fila [ctor] .
 
- op fila-vacia : -> Fila [ctor] .
- op enfila : Fila Persona -> Fila [ctor] .
+ 
+ op ordena : Fila Persona -> Fila .
+ eq ordena(fv,W) = W .
+ eq ordena(F . Persona(S, N, Bolsa[R, H, A], 0, P, U), Persona(S', N', Bolsa[R', H', A'], 1, P', U')) =
+ 	ordena(F, Persona(S', N', Bolsa[R', H', A'], 1, P', U'). Persona(S, N, Bolsa[R, H, A], 0, P, U)) .
 
- *** ¿Esto cubre los 3 casos?==================
-
- eq enfila(fv) = fv .
- eq enfila(F,Persona(S, N, Bolsa[R, H, A], 0, P, U), Persona(S', N' ,Bolsa[R', H', A'], 1, P', U')) =
- 	(F,Persona(S', N', Bolsa[R', H', A'], 1, P', U'), Persona(S, N, Bolsa[R, H, A], 0, P, U)) .
+ eq ordena(F . Persona(S, N, Bolsa[R, H, A], 1, P, U), Persona(S', N', Bolsa[R', H', A'], 1, P', U')) =
+  F. Persona(S, N, Bolsa[R, H, A], 1, P, U). Persona(S', N', Bolsa[R', H', A'], 1, P', U') .
+ 
+ eq ordena(F, W) = F . W [owise] .
 
  op sacadefila : Fila Persona -> Fila [ctor] .
  ceq sacadefila(F,Persona(S, N, Bolsa[R, H, A], V, P, U)) = (F,fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, U)
@@ -86,7 +85,7 @@ fmod LOCAL is
 
   op bebeRefrescoLocal : Persona Antro -> Persona Antro .
   ceq bebeRefresco(Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, R)) =
-    Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, R - 1)
+    Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, sd(R,1))
     if R > 0 .
 
   op bebeTequilaLocal : Persona Antro -> Persona Antro .
