@@ -24,7 +24,7 @@ fmod BOTELLON is
   vars S S' : String .
   vars W W' : Persona .
 
-  op entrabotellon : Botellon Persona -> Botellon [ctor].
+  op entrabotellon : Botellon Persona -> Botellon [ctor] .
 
   op bebeRefresco : Persona Persona -> Persona Persona .
   ceq bebeRefresco(Persona(S,N,Bolsa[R,H,A],V,P,U) W) = Persona(S,N,Bolsa[R - 1,H - 1,A],V,P,U) W
