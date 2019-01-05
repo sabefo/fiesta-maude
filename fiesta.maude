@@ -12,6 +12,8 @@ fmod PERSONAS is
   op BolsaVacia : -> Bolsa [ctor] .
   op Bolsa[_,_,_] : Nat Nat Nat -> Bolsa [ctor] .
   *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
+  *** ---- El atributo "V" es "1" para "VIP" y "0" para "no VIP"
+  *** ---- El atributo "U" es "1" para "Botellón","2" para "fila" y "3" para "Local"
   op Persona(_,_,_,_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
 
 endfm
@@ -60,10 +62,10 @@ mod BOTELLON is
  eq ordena(F, W) = F . W [owise] .
 
  op sacadefila : Fila Persona -> Fila [ctor] .
- ceq sacadefila(F,Persona(S, N, Bolsa[R, H, A], V, P, U)) = (F,fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, U)
+ ceq sacadefila(F,Persona(S, N, Bolsa[R, H, A], V, P, 1)) = (F,fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, 0)
  	if P > 2 .
 
- ceq sacadefila(F,Persona(S, N, Bolsa[R, H, A], V, P, U)) = (F,fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, U)
+ ceq sacadefila(F,Persona(S, N, Bolsa[R, H, A], V, P, 1)) = (F,fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, 0)
  	if N < 18 .
 
  op entralocal : Fila -> Fila .
@@ -94,3 +96,17 @@ fmod LOCAL is
     if R > 0 /\ A > 0 .
 
 endfm
+
+mod CHECK is
+  pr PROPS .
+  pr MODEL-CHECKER .
+  pr LTL-SIMPLIFIER .
+
+  op init : -> Configuration .
+  eq init =  Persona(Juan,50,[1,1,1],1,2,1) 
+  			 Persona(Pedro,32,[0,1,0],1,0,1)
+  			 Persona(Maria,20,[1,0,1],0,3,1)
+  			 Persona(Conchita,16,[2,0,2],0,1,1)
+  			 Persona(Alonso,19,[0,1,1],0,1,1)
+  			 Persona(Jaime,25,[1,1,0],0,4,1) .
+endm
