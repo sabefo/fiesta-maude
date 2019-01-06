@@ -165,16 +165,16 @@ mod CHECK is
   			 Persona("Maria",20,[1,0,0],0,3,2)
   			 Persona("Conchita",16,[2,0,2],0,1,2)
   			 Persona("Alonso",19,[0,1,1],0,1,2)
-  			 Persona("Jaime",25,[1,1,1],0,4,2) .
-  			 Persona("Dabi",23,[0,0,0],1,0,3) .
-  			 Local(5,6,5,1)
+  			 Persona("Jaime",25,[1,1,1],0,4,2)
+  			 Persona("Dabi",23,[0,0,0],1,0,3)
+  			 Local(5,6,5,1) .
 endm
 
 *** "Dabi" siempre está en el local.
 red modelCheck(init, <> EstaelweyLocal("Dabi") -> [] Persona("Dabi",23,[0,0,0],1,0,3)) .
 
 *** Si el aforo no se supera al principio, entonces no se supera nunca.
-red modelCheck(init, <> Local()) .
+red modelCheck(init, [] G > N) .
 
 *** Si alguien está en la cola acaba entrando.
   *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
@@ -189,7 +189,7 @@ red modelCheck(init, Botellon -> <> R = 0 ) .
 red modelCheck(init, Local -> <> R = 0 ) .
 
 *** En algún momento alguien bebe de más, y permanece en ese estado para siempre.
-red modelCheck(init, Persona(S,N,Bolsa,V,P,U) -> <> Persona(S,N,Bolsa,V,P,3)) .
+red modelCheck(init, Persona(S,N,Bolsa,V,P,U) -> <> [] P > 4) .
 
 *** Si hay hielo, refrescos y alcohol en la zona de botellón, entonces en algún momento alguien bebe de más.
-red modelCheck(init, Persona(S,N,Bolsa,V,P,2) -> <> Persona(S,N,Bolsa,V,P,3)) .
+red modelCheck(init, Persona(S,N,Bolsa,V,P,2) -> <> P > 3) .
