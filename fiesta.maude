@@ -1,3 +1,5 @@
+load model-checker.maude
+
 fmod PERSONAS is
   pr NAT .
   pr STRING .
@@ -22,7 +24,7 @@ mod BOTELLON is
   pr NAT .
   pr STRING .
   pr PERSONAS .
-  pr FILA .
+  pr LOCAL .
 
   vars R R' H H' A A' N N' V V' P P' U U' : Nat .
   vars S S' : String .
@@ -30,10 +32,10 @@ mod BOTELLON is
 
   op entrabotellon : Botellon Persona -> Botellon [ctor] .
 
-  crl [bebeTu] : Persona(S,N,Bolsa[R,H,A],V,P,U) => Persona(S,N,Bolsa[sd(R, 1),sd(H ,1),A],V,P,U)
+  crl [bebeTu] : Persona(S,N,Bolsa[R,H,A],V,P,U) => Persona(S,N,Bolsa[sd(R, 1),sd(H ,1),A], V, P + 1,U)
     if R > 0 /\ H > 0 .
 
-  crl [bebequita] :(Persona(S,N,Bolsa[R,H,A],V,P,U) Persona(S',N',Bolsa[R',H',A'],V',P',U')) => Persona(S,N,Bolsa[R - 1,H,A],V,P,U) Persona(S',N',Bolsa[R',sd(H',1),A'],V',P',U')
+  crl [bebequita] :(Persona(S,N,Bolsa[R,H,A],V,P,U) Persona(S',N',Bolsa[R',H',A'],V',P',U')) => Persona(S,N,Bolsa[sd(R,1),H,A],V, P + 1,U) Persona(S',N',Bolsa[R',sd(H',1),A'],V',P',U')
     if R > 0 /\ H == 0 /\ H' > 0 .
 
   crl [bebeTequila] : Persona(S,N,Bolsa[R,H,A],V,P,U) => Persona(S,N,Bolsa[sd(R,1),sd(H,1),sd(A,1)], V, P + 1,U)
@@ -62,15 +64,16 @@ mod BOTELLON is
  eq ordena(F, W) = F . W [owise] .
 
  op sacadefila : Fila Persona -> Fila [ctor] .
- ceq sacadefila(F,Persona(S, N, Bolsa[R, H, A], V, P, 1)) = (F,fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, 0)
+ ceq sacadefila(F . Persona(S, N, Bolsa[R, H, A], V, P, 2)) = (F . fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, 1)
  	if P > 2 .
 
- ceq sacadefila(F,Persona(S, N, Bolsa[R, H, A], V, P, 1)) = (F,fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, 0)
+ ceq sacadefila(F,Persona(S, N, Bolsa[R, H, A], V, P, 2)) = (F,fv) entrabotellon(Persona(S, N, Bolsa[R, H, A], V, P, 1)
  	if N < 18 .
 
- op entralocal : Fila -> Fila .
- eq entralocal(fila-vacia) = fila-vacia .
- eq entralocal(enfila(P, F)) = F .
+ op entralocal : Fila Local -> Fila Local .
+ eq entralocal(fila-vacia Local) = fila-vacia Local .
+ ceq entralocal((P . F) Local(N,A,R,P)) = F Local(N,A,R,P + 1) 
+  if P < N .
 
 endm
 
@@ -79,23 +82,74 @@ fmod LOCAL is
   pr PERSONAS .
 
   sort Persona .
-  *** ---- Aforo, Alcohol, Refresco
-  op Antro(_,_,_) : Nat Nat Nat -> Antro [ctor] .
+  *** ---- Aforo, Alcohol, Refresco, Personas
+  op Local(_,_,_,_) : Nat Nat Nat Nat -> Local [ctor assoc comm] .
+  var G : Nat .
+  var Dabi : Persona .
 
   *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
-  op Persona(_,_,BolsaVacia[0,0,0],_,_,_) : String Nat Bolsa Nat Nat Nat -> Persona [ctor] .
+  op Persona(_,_,_,_,_,_) : String Nat BolsaVacia Nat Nat Nat -> Persona [ctor] .
 
-  op bebeRefrescoLocal : Persona Antro -> Persona Antro .
-  ceq bebeRefresco(Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, R)) =
-    Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, sd(R,1))
+  op bebeRefrescoLocal : Persona Local -> Persona Local .
+  ceq bebeRefresco(Persona(S, N, Bolsa[0, 0, 0], V, P, U) Local(G, A, R, N)) =
+    Persona(S, N, Bolsa[0, 0, 0], V, P, U) Local(G, A, sd(R,1), N)
     if R > 0 .
 
-  op bebeTequilaLocal : Persona Antro -> Persona Antro .
-  ceq bebeTequila(Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A, R)) =
-    Persona(S, N, Bolsa[0, 0, 0], V, P, U) Antro(G, A - 1, R - 1)
-    if R > 0 /\ A > 0 .
+  op bebeTequilaLocal : Persona Local -> Persona Local .
+  ceq bebeTequila(Persona(S, N, Bolsa[0, 0, 0], V, P, U) Local(G, A, R, N)) =
+    Persona(S, N, Bolsa[0, 0, 0], V, P + 1, U) Local(G, sd(A,1), sd(R,1), N)
+    if R > 0 /\ A > 0 /\ P < 4 /\ S=/="Dabi" .
+
+  op sicario : Dabi Persona Local~> Dabi Local [ctor] .
+  ceq sicario(Dabi, Persona(S, N, BolsaVacia, V, P, 3), Local (G,A,R,N)) = Dabi, Local(G,A,R,sd(N,1)) 
+ 	if P > 3 .
 
 endfm
+
+mod PROPS is
+  pr SATISFACTION .
+  pr BOTELLON .
+  pr LOCAL .
+  vars C : Configuration .
+  vars X : Nat .
+
+  *** Si se ha acabado el alcohol en el local.
+  op Nohaytequila : -> Prop [ctor] .
+  eq Local(G,0,R,N) |= Nohaytequila = true .
+
+  *** Si se ha acabado el refresco en el local.
+  op Nohayfrutiño : -> Prop [ctor] .
+  eq Local(G,A,0,N) |= Nohayfrutiño = true .
+
+  *** Si alguien (identificado por su nombre) está en el local
+  op EstaelweyLocal(S) : Local Persona -> Prop [ctor] .
+  eq Local Persona |= EstaelweyLocal = true .
+
+  *** Si alguien (identificado por su nombre) está en la cola
+  op EstaelweyFila(S) : Fila Persona -> Prop [ctor] .
+  eq Fila Persona(S,N,Bolsa, V, P,2) |= EstaelweyFila = true .
+
+  *** si el número de personas en el interior del local es menor de un cierto número dado como argumento.
+  op genteLocal(X) : Local(G, A, R, N) -> Prop [ctor] .
+  eq X < N |= genteLocal = true .
+
+  *** si una persona ha bebido demasiado (3 o más copas fuera del local o 4 o más dentro)
+  op borracho : -> Prop [ctor] .
+  eq Persona(S,N,Bolsa, V, 3, 2) |= borracho = true .
+  eq Persona(S,N,BolsaVacia, V, 4, 3) |= borracho = true .
+
+  *** si queda hielo en la zona de botellón.
+  op hieloBotellon : Persona(S,N,Bolsa[R,H,A], V, P, 1) -> Prop [ctor] .
+  eq H > 0 |= hieloBotellon = true .
+
+  *** si quedan refrescos en la zona de botellón.
+  op refrescoBotellon : Persona(S,N,Bolsa[R,H,A], V, P, 1) -> Prop [ctor] .
+  eq R > 0 |= refrescoBotellon = true .
+
+  *** si quedan alcohol en la zona de botellón.
+  op tequilaBotellon : Persona(S,N,Bolsa[R,H,A], V, P, 1) -> Prop [ctor] .
+  eq A > 0 |= tequilaBotellon = true .
+endm
 
 mod CHECK is
   pr PROPS .
@@ -103,10 +157,39 @@ mod CHECK is
   pr LTL-SIMPLIFIER .
 
   op init : -> Configuration .
-  eq init =  Persona(Juan,50,[1,1,1],1,2,1) 
-  			 Persona(Pedro,32,[0,1,0],1,0,1)
-  			 Persona(Maria,20,[1,0,1],0,3,1)
-  			 Persona(Conchita,16,[2,0,2],0,1,1)
-  			 Persona(Alonso,19,[0,1,1],0,1,1)
-  			 Persona(Jaime,25,[1,1,0],0,4,1) .
+
+
+  *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
+  eq init =  Persona("Juan",50,[1,1,1],1,2,2) 
+  			 Persona("Pedro",32,[0,1,0],1,0,2)
+  			 Persona("Maria",20,[1,0,0],0,3,2)
+  			 Persona("Conchita",16,[2,0,2],0,1,2)
+  			 Persona("Alonso",19,[0,1,1],0,1,2)
+  			 Persona("Jaime",25,[1,1,1],0,4,2) .
+  			 Persona("Dabi",23,[0,0,0],1,0,3) .
+  			 Local(5,6,5,1)
 endm
+
+*** "Dabi" siempre está en el local.
+red modelCheck(init, <> EstaelweyLocal("Dabi") -> [] Persona("Dabi",23,[0,0,0],1,0,3)) .
+
+*** Si el aforo no se supera al principio, entonces no se supera nunca.
+red modelCheck(init, <> Local()) .
+
+*** Si alguien está en la cola acaba entrando.
+  *** ---- Nombre, Edad, Bolsa, VIP, Peda, Ubicacion
+red modelCheck(init, <> Persona(S,N,Bolsa,V,P,2) -> <> Persona(S,N,Bolsa,V,P,3)) .
+
+*** El alcohol nunca se acaba.
+red modelCheck(init, Botellon -> [] A > 0 ) .
+red modelCheck(init, Local -> [] A > 0 ) .
+
+*** Los refrescos siempre se acaban.
+red modelCheck(init, Botellon -> <> R = 0 ) .
+red modelCheck(init, Local -> <> R = 0 ) .
+
+*** En algún momento alguien bebe de más, y permanece en ese estado para siempre.
+red modelCheck(init, Persona(S,N,Bolsa,V,P,U) -> <> Persona(S,N,Bolsa,V,P,3)) .
+
+*** Si hay hielo, refrescos y alcohol en la zona de botellón, entonces en algún momento alguien bebe de más.
+red modelCheck(init, Persona(S,N,Bolsa,V,P,2) -> <> Persona(S,N,Bolsa,V,P,3)) .
